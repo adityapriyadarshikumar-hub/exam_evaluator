@@ -1,17 +1,30 @@
-import re
+from utils.llm_client import call_llm
+from utils.json_utils import safe_json_load
 
 def extract_student_info(clean_text: str) -> dict:
-    name = "Unknown"
-    rollno = "Unknown"
-    
-    # Search for name patterns
-    name_match = re.search(r'(?i)(name|student name)[:\s]*([A-Za-z\s]+)', clean_text)
-    if name_match:
-        name = name_match.group(2).strip()
-    
-    # Search for rollno patterns
-    roll_match = re.search(r'(?i)(roll|rollno|roll number|id)[:\s]*([A-Za-z0-9]+)', clean_text)
-    if roll_match:
-        rollno = roll_match.group(2).strip()
-    
-    return {"name": name, "rollno": rollno}
+    if not clean_text.strip():
+        return {"name": "Unknown", "rollno": "Unknown"}
+    prompt = f"""
+Extract the student's name and roll number from the exam paper text.
+
+Look for patterns like:
+- Name: [name]
+- Roll No: [number]
+- Student ID: [number]
+- etc.
+
+Text:
+{clean_text}
+
+Return STRICT JSON:
+{{
+  "name": "extracted name or Unknown",
+  "rollno": "extracted roll or Unknown"
+}}
+
+If not found, use "Unknown".
+"""
+    try:
+        return safe_json_load(call_llm(prompt))
+    except:
+        return {"name": "Unknown", "rollno": "Unknown"}
