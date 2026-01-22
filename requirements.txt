@@ -1,0 +1,9 @@
+openai
+pdf2image
+pillow
+easyocr
+pydantic
+python-dotenv
+torch
+torchvision
+numpy

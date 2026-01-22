@@ -1,0 +1,30 @@
+from utils.llm_client import call_llm
+from utils.json_utils import safe_json_load
+
+def evaluate_unit(question, unit, student_answer):
+    prompt = f"""
+You are an impartial exam evaluator.
+
+Question:
+{question}
+
+Rubric Unit:
+{unit}
+
+Student Answer:
+{student_answer}
+
+Rules:
+- Allow paraphrasing
+- Ignore grammar
+- No assumptions
+
+Return STRICT JSON:
+{{
+  "unit_id": "{unit['unit_id']}",
+  "score_awarded": number,
+  "confidence": 0.0,
+  "justification": "short"
+}}
+"""
+    return safe_json_load(call_llm(prompt))
