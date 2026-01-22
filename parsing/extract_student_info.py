@@ -26,7 +26,7 @@ Return STRICT JSON:
 If not found, use "Unknown".
 """
     try:
-        return safe_json_load(call_llm(prompt))
+        return safe_json_load(call_llm(prompt, force_openai=True))
     except:
         return {"name": "Unknown", "rollno": "Unknown"}
 
@@ -42,7 +42,9 @@ def remove_student_info_from_text(clean_text: str) -> str:
         r'^\s*ID\s*:',
         r'^\s*Student\s*Name\s*:',
         r'Roll\s*No',
-        r'Student\s*ID'
+        r'Student\s*ID',
+        r'Roll\s*No\s*:',
+        r'Student\s*ID\s*:'
     ]
     for line in lines:
         if not any(re.search(pattern, line, re.IGNORECASE) for pattern in patterns):

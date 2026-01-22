@@ -22,7 +22,7 @@ Return JSON like:
 
 Keep units at the subquestion level, not individual steps.
 """
-    result = safe_json_load(call_llm(prompt))
+    result = safe_json_load(call_llm(prompt, force_openai=True))
     # Ensure it's a dict with lists
     if not isinstance(result, dict):
         return {}
