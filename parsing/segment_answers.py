@@ -2,6 +2,8 @@ from utils.llm_client import call_llm
 from utils.json_utils import safe_json_load
 
 def segment_answers(clean_text: str) -> dict:
+    if not clean_text.strip():
+        return {}
     prompt = f"""
 You are an exam answer segmentation system.
 

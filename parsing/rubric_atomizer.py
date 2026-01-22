@@ -2,6 +2,8 @@ from utils.llm_client import call_llm
 from utils.json_utils import safe_json_load
 
 def atomize_rubric(rubric_text: str) -> dict:
+    if not rubric_text.strip():
+        return {}
     prompt = f"""
 Convert the rubric into atomic scoring units.
 
