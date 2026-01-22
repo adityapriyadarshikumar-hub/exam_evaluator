@@ -16,7 +16,10 @@ llm_pipeline = pipeline("text2text-generation", model="google/flan-t5-small", de
 def call_llm(prompt: str) -> str:
     # Try local LLM first
     try:
-        result = llm_pipeline(prompt, max_length=MAX_TOKENS, temperature=TEMPERATURE, do_sample=True)
+        # Adjust temperature for local model
+        temp = TEMPERATURE if TEMPERATURE > 0 else 0.1
+        do_sample = TEMPERATURE > 0
+        result = llm_pipeline(prompt, max_new_tokens=MAX_TOKENS, temperature=temp, do_sample=do_sample)
         return result[0]['generated_text'].strip()
     except Exception as e:
         print(f"Local LLM failed: {e}, falling back to OpenAI")
