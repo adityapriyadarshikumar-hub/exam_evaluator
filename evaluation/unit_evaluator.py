@@ -1,5 +1,6 @@
 from utils.llm_client import call_llm, compute_similarity
 from utils.json_utils import safe_json_load
+from utils.logger import logger
 
 def evaluate_unit(question, unit, student_answer):
     prompt = f"""
@@ -31,6 +32,10 @@ Return STRICT JSON:
     result["question"] = question
     # Compute similarity between student answer and rubric unit text
     rubric_text = str(unit)
-    similarity = compute_similarity(student_answer, rubric_text)
+    try:
+        similarity = compute_similarity(student_answer, rubric_text)
+    except Exception as e:
+        logger.warning(f"Failed to compute similarity: {e}")
+        similarity = 0.0
     result["similarity"] = similarity
     return result
