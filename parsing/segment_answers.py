@@ -16,14 +16,17 @@ Task:
 TEXT:
 {clean_text}
 
-Return ONLY valid JSON in this format:
-```json
+Return ONLY valid JSON in this exact format, no other text:
+
 {{
   "Q1": "answer text for question 1",
   "Q2": "answer text for question 2"
 }}
-```
 
-Do not include any other text or explanations.
+Example:
+{{
+  "Q1": "This is the answer to question 1.",
+  "Q2": "This is the answer to question 2."
+}}
 """
     return safe_json_load(call_llm(prompt))

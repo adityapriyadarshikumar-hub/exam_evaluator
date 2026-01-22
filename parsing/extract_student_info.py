@@ -40,7 +40,9 @@ def remove_student_info_from_text(clean_text: str) -> str:
         r'^\s*Student\s*ID\s*:',
         r'^\s*Roll\s*Number\s*:',
         r'^\s*ID\s*:',
-        r'^\s*Student\s*Name\s*:'
+        r'^\s*Student\s*Name\s*:',
+        r'Roll\s*No',
+        r'Student\s*ID'
     ]
     for line in lines:
         if not any(re.search(pattern, line, re.IGNORECASE) for pattern in patterns):
