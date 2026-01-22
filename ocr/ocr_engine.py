@@ -1,7 +1,9 @@
 import easyocr
 import numpy as np
+import torch
 
-reader = easyocr.Reader(['en'], gpu=False)
+gpu = torch.cuda.is_available()
+reader = easyocr.Reader(['en'], gpu=gpu)
 
 def run_ocr(images):
     lines = []
