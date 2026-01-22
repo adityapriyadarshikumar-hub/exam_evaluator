@@ -1,19 +1,17 @@
-from utils.llm_client import call_llm
-from utils.json_utils import safe_json_load
+import re
 
 def extract_student_info(clean_text: str) -> dict:
-    if not clean_text.strip():
-        return {"name": "Unknown", "rollno": "Unknown"}
-    prompt = f"""
-Extract student name and roll number from the text.
-
-Text:
-{clean_text}
-
-Return STRICT JSON:
-{{
-  "name": "string",
-  "rollno": "string"
-}}
-"""
-    return safe_json_load(call_llm(prompt))
+    name = "Unknown"
+    rollno = "Unknown"
+    
+    # Search for name patterns
+    name_match = re.search(r'(?i)(name|student name)[:\s]*([A-Za-z\s]+)', clean_text)
+    if name_match:
+        name = name_match.group(2).strip()
+    
+    # Search for rollno patterns
+    roll_match = re.search(r'(?i)(roll|rollno|roll number|id)[:\s]*([A-Za-z0-9]+)', clean_text)
+    if roll_match:
+        rollno = roll_match.group(2).strip()
+    
+    return {"name": name, "rollno": rollno}
