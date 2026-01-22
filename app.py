@@ -3,7 +3,7 @@ from ocr.ocr_engine import run_ocr
 from ocr.ocr_cleanup import cleanup_ocr_text
 from parsing.segment_answers import segment_answers
 from parsing.rubric_atomizer import atomize_rubric
-from parsing.extract_student_info import extract_student_info
+from parsing.extract_student_info import extract_student_info, remove_student_info_from_text
 from evaluation.unit_evaluator import evaluate_unit
 from evaluation.confidence_checker import needs_manual_review
 from evaluation.score_aggregator import aggregate_scores
@@ -28,17 +28,20 @@ def evaluate_student(student_pdf, rubric_pdf, subject):
     # 3️⃣ Extract student info
     student_info = extract_student_info(clean_text)
 
-    # 4️⃣ Segment answers
+    # 4️⃣ Remove student info from text for better segmentation
+    clean_text = remove_student_info_from_text(clean_text)
+
+    # 5️⃣ Segment answers
     answers = segment_answers(clean_text)
 
-    # 5️⃣ Atomize rubric
+    # 6️⃣ Atomize rubric
     rubric_units = atomize_rubric(rubric_text)
 
     all_results = []
     question_scores = {}
     question_similarities = {}
 
-    # 6️⃣ Unit-wise evaluation
+    # 7️⃣ Unit-wise evaluation
     for q, units in rubric_units.items():
         question_results = []
         unit_scores = {}
@@ -56,11 +59,11 @@ def evaluate_student(student_pdf, rubric_pdf, subject):
         }
         all_results.extend(question_results)
 
-    # 7️⃣ Final score
+    # 8️⃣ Final score
     total_score = aggregate_scores(all_results)["total"]
     logger.info(f"Final Score: {total_score}")
 
-    # 8️⃣ Overall similarity (average)
+    # 9️⃣ Overall similarity (average)
     overall_similarity = sum(question_similarities.values()) / len(question_similarities) if question_similarities else 0
 
     # For output, return dict
