@@ -10,6 +10,7 @@ from evaluation.score_aggregator import aggregate_scores
 from human_review.flagger import flag_student
 from rubric.pdf_to_text import extract_rubric_text
 from utils.logger import logger
+import json
 
 
 def evaluate_student(student_pdf, rubric_pdf, subject):
@@ -77,4 +78,4 @@ if __name__ == "__main__":
         rubric_pdf="data/rubrics/rubric.pdf",
         subject="DSA"
     )
-    print("EVALUATION RESULT =", result)
+    print(json.dumps(result, indent=2))
