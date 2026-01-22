@@ -13,7 +13,18 @@ client = OpenAI(api_key=OPENAI_API_KEY)
 embedding_model = SentenceTransformer('all-MiniLM-L6-v2')  # Local embeddings
 llm_pipeline = pipeline("text2text-generation", model="google/flan-t5-small", device=0 if torch.cuda.is_available() else -1)  # Local LLM
 
-def call_llm(prompt: str) -> str:
+def call_llm(prompt: str, force_openai: bool = False) -> str:
+    if force_openai:
+        response = client.chat.completions.create(
+            model=LLM_MODEL,
+            temperature=TEMPERATURE,
+            max_tokens=MAX_TOKENS,
+            messages=[
+                {"role": "user", "content": prompt}
+            ]
+        )
+        time.sleep(2)  # Delay to avoid rate limits
+        return response.choices[0].message.content.strip()
     # Try local LLM first
     try:
         # flan-t5 may not support temperature, so use default

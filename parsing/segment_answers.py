@@ -29,4 +29,4 @@ Example:
   "Q2": "This is the answer to question 2."
 }}
 """
-    return safe_json_load(call_llm(prompt))
+    return safe_json_load(call_llm(prompt, force_openai=True))
