@@ -30,12 +30,4 @@ Return STRICT JSON:
 """
     result = safe_json_load(call_llm(prompt))
     result["question"] = question
-    # Compute similarity between student answer and rubric unit text
-    rubric_text = str(unit)
-    try:
-        similarity = compute_similarity(student_answer, rubric_text)
-    except Exception as e:
-        logger.warning(f"Failed to compute similarity: {e}")
-        similarity = 0.0
-    result["similarity"] = similarity
     return result

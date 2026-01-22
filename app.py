@@ -10,6 +10,7 @@ from evaluation.score_aggregator import aggregate_scores
 from human_review.flagger import flag_student
 from rubric.pdf_to_text import extract_rubric_text
 from utils.logger import logger
+from utils.llm_client import compute_similarity
 import json
 
 
@@ -40,17 +41,22 @@ def evaluate_student(student_pdf, rubric_pdf, subject):
     # 6️⃣ Unit-wise evaluation
     for q, units in rubric_units.items():
         question_results = []
-        similarities = []
         for unit in units:
             result = evaluate_unit(q, unit, answers.get(q, ""))
             if needs_manual_review(result):
                 flag_student(student_pdf, result["justification"])
             question_results.append(result)
-            similarities.append(result.get("similarity", 0))
         # Aggregate per question
         q_score = aggregate_scores(question_results)
         question_scores[q] = q_score["total"]  # since aggregate_scores returns dict, take total
-        question_similarities[q] = sum(similarities) / len(similarities) if similarities else 0
+        # Compute similarity per question
+        rubric_combined = " ".join(str(unit) for unit in units)
+        try:
+            similarity = compute_similarity(answers.get(q, ""), rubric_combined)
+        except Exception as e:
+            logger.warning(f"Failed to compute similarity for {q}: {e}")
+            similarity = 0.0
+        question_similarities[q] = similarity
         all_results.extend(question_results)
 
     # 7️⃣ Final score
