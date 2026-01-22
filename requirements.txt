@@ -8,3 +8,6 @@ torch
 torchvision
 numpy
 scikit-learn
+sentence-transformers
+transformers
+accelerate
