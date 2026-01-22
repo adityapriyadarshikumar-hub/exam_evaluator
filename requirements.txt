@@ -7,3 +7,4 @@ python-dotenv
 torch
 torchvision
 numpy
+scikit-learn

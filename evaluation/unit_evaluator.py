@@ -1,4 +1,4 @@
-from utils.llm_client import call_llm
+from utils.llm_client import call_llm, compute_similarity
 from utils.json_utils import safe_json_load
 
 def evaluate_unit(question, unit, student_answer):
@@ -27,4 +27,10 @@ Return STRICT JSON:
   "justification": "short"
 }}
 """
-    return safe_json_load(call_llm(prompt))
+    result = safe_json_load(call_llm(prompt))
+    result["question"] = question
+    # Compute similarity between student answer and rubric unit text
+    rubric_text = str(unit)
+    similarity = compute_similarity(student_answer, rubric_text)
+    result["similarity"] = similarity
+    return result

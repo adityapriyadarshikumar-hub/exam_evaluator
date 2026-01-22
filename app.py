@@ -3,6 +3,7 @@ from ocr.ocr_engine import run_ocr
 from ocr.ocr_cleanup import cleanup_ocr_text
 from parsing.segment_answers import segment_answers
 from parsing.rubric_atomizer import atomize_rubric
+from parsing.extract_student_info import extract_student_info
 from evaluation.unit_evaluator import evaluate_unit
 from evaluation.confidence_checker import needs_manual_review
 from evaluation.score_aggregator import aggregate_scores
@@ -22,33 +23,58 @@ def evaluate_student(student_pdf, rubric_pdf, subject):
     raw_text = run_ocr(images)
     clean_text = cleanup_ocr_text(raw_text, subject)
 
-    # 3️⃣ Segment answers
+    # 3️⃣ Extract student info
+    student_info = extract_student_info(clean_text)
+
+    # 4️⃣ Segment answers
     answers = segment_answers(clean_text)
 
-    # 4️⃣ Atomize rubric
+    # 5️⃣ Atomize rubric
     rubric_units = atomize_rubric(rubric_text)
 
     all_results = []
+    question_scores = {}
+    question_similarities = {}
 
-    # 5️⃣ Unit-wise evaluation
+    # 6️⃣ Unit-wise evaluation
     for q, units in rubric_units.items():
+        question_results = []
+        similarities = []
         for unit in units:
             result = evaluate_unit(q, unit, answers.get(q, ""))
             if needs_manual_review(result):
                 flag_student(student_pdf, result["justification"])
-            all_results.append(result)
+            question_results.append(result)
+            similarities.append(result.get("similarity", 0))
+        # Aggregate per question
+        q_score = aggregate_scores(question_results)
+        question_scores[q] = q_score["total"]  # since aggregate_scores returns dict, take total
+        question_similarities[q] = sum(similarities) / len(similarities) if similarities else 0
+        all_results.extend(question_results)
 
-    # 6️⃣ Final score
-    final_score = aggregate_scores(all_results)
-    logger.info(f"Final Score: {final_score}")
+    # 7️⃣ Final score
+    total_score = aggregate_scores(all_results)["total"]
+    logger.info(f"Final Score: {total_score}")
 
-    return final_score
+    # 8️⃣ Overall similarity (average)
+    overall_similarity = sum(question_similarities.values()) / len(question_similarities) if question_similarities else 0
+
+    # For output, return dict
+    result = {
+        "name": student_info.get("name", "Unknown"),
+        "rollno": student_info.get("rollno", "Unknown"),
+        "question_scores": question_scores,
+        "total_score": total_score,
+        "similarity": overall_similarity
+    }
+
+    return result
 
 
 if __name__ == "__main__":
-    score = evaluate_student(
+    result = evaluate_student(
         student_pdf="data/students/student.pdf",
         rubric_pdf="data/rubrics/rubric.pdf",
         subject="DSA"
     )
-    print("FINAL SCORE =", score)
+    print("EVALUATION RESULT =", result)
